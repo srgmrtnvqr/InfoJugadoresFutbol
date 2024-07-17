@@ -1,2 +1,2 @@
 # InfoLaLiga
-Descarga de datos de la pagina web de la Liga.
+Descarga de datos de la página web de la Liga.
