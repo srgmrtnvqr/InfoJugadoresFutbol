@@ -3,6 +3,11 @@ import requests
 import time
 import json
 import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+opciones = webdriver.ChromeOptions()
+opciones.add_experimental_option('excludeSwitches', ['enable-logging'])
 
 ##### LIGA ESPAÑOLA #####
 def obtenerEnlacesEquipos():    # Función que devuelve el enlace de cada equipo de La Liga
@@ -10,8 +15,8 @@ def obtenerEnlacesEquipos():    # Función que devuelve el enlace de cada equipo
     peticion = requests.get(url_principal)  # Petición a la página web 
     time.sleep(2)
     sopa = BeautifulSoup(peticion.text, 'lxml') # Todo el contenido de la página
-    contenido = sopa.find("div", class_="styled__GridStyled-sc-skzs8h-0 fVbFTE")   
-    elementos = contenido.find_all("a", class_="link")  # Buscar en la página los elementos donde están los enlaces
+    contenido = sopa.find('div', class_='styled__GridStyled-sc-skzs8h-0 fVbFTE')   
+    elementos = contenido.find_all('a', class_='link')  # Buscar en la página los elementos donde están los enlaces
     enlaces_equipos = []
     for i in range(len(elementos)):
         enlace = elementos[i].get('href')   # Obtener los enlaces del atributo href
@@ -26,8 +31,8 @@ def obtenerEnlacesJugadores():  # Función que devuelve el enlace de cada jugado
         peticion = requests.get(url_equipo)
         time.sleep(2)
         sopa = BeautifulSoup(peticion.text, 'lxml')
-        contenido = sopa.find("div", class_="styled__SquadListContainer-sc-sx1q1t-0 hwjXzG")
-        elementos = contenido.find_all("a", class_="link")
+        contenido = sopa.find('div', class_='styled__SquadListContainer-sc-sx1q1t-0 hwjXzG')
+        elementos = contenido.find_all('a', class_='link')
         for i in range(len(elementos)):
             enlace_jugador = elementos[i].get('href')
             enlaces_jugadores.append(enlace_jugador)
@@ -97,7 +102,7 @@ def obtenerDatosJugadores(enlaces_jugadores):    # Función que devuelve un data
             equipos.append(equipo)
             dorsales.append(dorsal)
             fotos.append(foto)  # Final del bucle FOR
-    columnas = ['jugador','apodo','fecha','peso','altura','pais','posicion','equipo','dorsal','url']
+    columnas = ['jugador', 'apodo', 'fecha', 'peso', 'altura', 'pais', 'posicion', 'equipo', 'dorsal', 'url']
     df_jugadores = pd.DataFrame([nombres, apodos, fechas_nacimiento, pesos, alturas, paises, 
                                 posiciones, equipos, dorsales, fotos], index=columnas)
     return df_jugadores.T # Se devuelve el dataframe transpuesto
@@ -108,8 +113,8 @@ def obtenerEnlacesEquiposPremier(): # Función que devuelve una lista con los en
     peticion = requests.get(url_principal)  # Petición a la página web 
     time.sleep(2)
     sopa = BeautifulSoup(peticion.text, 'lxml') # Todo el contenido de la página
-    contenedor = sopa.find("ul", class_="club-list dataContainer")
-    enlaces = contenedor.find_all("a")
+    contenedor = sopa.find('ul', class_='club-list dataContainer')
+    enlaces = contenedor.find_all('a')
     lista_enlaces = []
     for i in range(len(enlaces)):
         enlace = enlaces[i].get('href')
@@ -125,9 +130,64 @@ def obtenerEnlacesJugadoresPremier():   # Función que devuelve el enlace de cad
         time.sleep(2)
         peticion = requests.get(url_equipo)
         sopa = BeautifulSoup(peticion.text, 'lxml')
-        contenedor = sopa.find('div', class_="wrapper col-12")
-        enlaces = contenedor.find_all("a")
+        contenedor = sopa.find('div', class_='wrapper col-12')
+        enlaces = contenedor.find_all('a')
         for i in range(len(enlaces)):
             enlace_jugador = enlaces[i].get('href')
             lista_jugadores.append(enlace_jugador)
     return lista_jugadores
+
+def obtenerDatosJugadoresPremier(): # Función que devuelve un dataframe con los datos de los jugadores de la Premier League
+    nombres = []
+    equipos = []
+    dorsales = []
+    posiciones = []
+    paises = []
+    fotos = []
+    urls_equipos = obtenerEnlacesEquiposPremier()   # Llamada a la función para obtener los enlaces de los equipos
+    for i in range(len(urls_equipos)):  # Primer bucle For para cada equipo
+        url_equipo = 'https://www.premierleague.com' + urls_equipos[i]
+        ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
+        driver = webdriver.Chrome(service=ruta, options=opciones)
+        driver.get(url_equipo)  # Para poder acceder a la url de las imágenes
+        imagenes = driver.find_elements(By.XPATH, '//*[@id="mainContent"]/div[3]/div/ul/div/ul/li/a/div/div/div[3]/img')
+        peticion = requests.get(url_equipo) # Para acceder a los demás datos de los jugadores
+        sopa = BeautifulSoup(peticion.text, 'lxml')
+        equipo = sopa.find('h2', class_='club-header__team-name').get_text()
+        contenedor = sopa.findAll('div', class_='stats-card__container')    # Aquí se encuentran los datos de los jugadores
+        time.sleep(2)
+        for i in range(len(contenedor)):    # Segundo bucle For para cada contenedor de cada jugador
+            if(contenedor[i].find('div', class_='stats-card__player-first') != None):
+                nombre = contenedor[i].find('div', class_='stats-card__player-first').get_text()
+            else:
+                nombre = ''
+            if(contenedor[i].find('div', class_='stats-card__player-last') != None):
+                apellido = contenedor[i].find('div', class_='stats-card__player-last').get_text()
+            else:
+                apellido = ''
+            nombre_apellido = nombre + apellido
+            if(contenedor[i].find('div', class_='stats-card__squad-number u-hide-mob-l') != None):
+                dorsal = contenedor[i].find('div', class_='stats-card__squad-number u-hide-mob-l').get_text()
+            else:
+                dorsal = ''
+            if(contenedor[i].find('div', class_='stats-card__player-position') != None):
+                posicion = contenedor[i].find('div', class_='stats-card__player-position').get_text()
+            else:
+                posicion = ''
+            if(contenedor[i].find('span', class_='stats-card__player-country') != None):
+                pais = contenedor[i].find('span', class_='stats-card__player-country').get_text()
+            else:
+                pais = ''
+            url_foto = imagenes[i].get_attribute('src')
+            nombres.append(nombre_apellido)
+            equipos.append(equipo)
+            dorsales.append(dorsal)
+            posiciones.append(posicion)
+            paises.append(pais)
+            fotos.append(url_foto)  # Final del segundo bucle For
+    # Final del primer bucle For
+    # Crear un dataframe con los datos obtenidos
+    columnas = ['jugador', 'equipo', 'dorsal', 'posicion', 'pais', 'url']
+    df_jugadores = pd.DataFrame([nombres, equipos, dorsales, posiciones, paises, fotos], index=columnas)
+    return df_jugadores.T
+        
