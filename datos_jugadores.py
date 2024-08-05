@@ -191,3 +191,34 @@ def obtenerDatosJugadoresPremier(): # Función que devuelve un dataframe con los
     df_jugadores = pd.DataFrame([nombres, equipos, dorsales, posiciones, paises, fotos], index=columnas)
     return df_jugadores.T
         
+##### BUNDESLIGA #####
+def obtenerEnlacesEquiposBundesliga():    # Función que devuelve el enlace de cada equipo de la Bundesliga
+    url_principal = 'https://www.bundesliga.com/de/bundesliga/clubs'
+    peticion = requests.get(url_principal)  # Petición a la página web 
+    time.sleep(2)
+    sopa = BeautifulSoup(peticion.text, 'lxml') # Todo el contenido de la página
+    contenido = sopa.find('div', class_='clubs grid')   
+    elementos = contenido.find_all('a')  # Buscar en la página los elementos donde están los enlaces
+    enlaces_equipos = []
+    for i in range(len(elementos)):
+        enlace = elementos[i].get('href')   # Obtener los enlaces del atributo href
+        enlaces_equipos.append(enlace)
+    return enlaces_equipos
+
+def obtenerEnlacesJugadoresBundesliga():  # Función que devuelve el enlace de cada jugador de la Bundesliga
+    enlaces_jugadores = []
+    enlaces_equipos = obtenerEnlacesEquiposBundesliga()
+    for i in range(len(enlaces_equipos)):
+        url_equipo = 'https://www.bundesliga.com' + enlaces_equipos[i]
+        if url_equipo == 'https://www.bundesliga.com/de/bundesliga/clubs/sc-freiburg':
+            pass    # Este enlace no está disponible actualmente
+        else:
+            peticion = requests.get(url_equipo)
+            time.sleep(4)
+            sopa = BeautifulSoup(peticion.text, 'lxml')
+            contenido = sopa.find('div', class_='container ng-star-inserted') # Aquí se encuentran todos los jugadores
+            elementos = contenido.find_all('a')
+            for i in range(len(elementos)):
+                enlace_jugador = elementos[i].get('href')
+                enlaces_jugadores.append(enlace_jugador)
+    return enlaces_jugadores
