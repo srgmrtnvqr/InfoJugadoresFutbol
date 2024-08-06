@@ -222,3 +222,48 @@ def obtenerEnlacesJugadoresBundesliga():  # Función que devuelve el enlace de c
                 enlace_jugador = elementos[i].get('href')
                 enlaces_jugadores.append(enlace_jugador)
     return enlaces_jugadores
+
+def obtenerDatosJugadoresBundesliga():  # Función que devuelve un dataframe con los datos de los jugadores de la Bundesliga
+    jugadores_bdl = obtenerEnlacesJugadoresBundesliga()
+    columnas = {'nombre': [], 'dorsal': [], 'Club': [], 'Position': [], 'Geburtstag': [], 'Nationalität': [], 'Größe': [], 'Gewicht': [], 'foto': []}
+    df_jugadores = pd.DataFrame.from_dict(columnas) # Dataframe para almacenar a todos los jugadores
+    for i in range(len(jugadores_bdl)):
+        lista_columnas = ['nombre', 'dorsal','foto']
+        lista_valores = []
+        url_jugador = 'https://www.bundesliga.com' + jugadores_bdl[i]
+        peticion = requests.get(url_jugador)
+        time.sleep(3)
+        sopa = BeautifulSoup(peticion.text, 'lxml')
+        contenido = sopa.find('header', class_='header container-fluid')    # Aquí se encuentran todos los datos del jugador
+        try:
+            nombre = contenido.find('div', class_='firstName').get_text()
+        except:
+            nombre = ''
+        try:
+            apellido = contenido.find('div', class_='lastName').get_text()
+        except:
+            apellido = ''
+        nombre = nombre + ' ' + apellido
+        lista_valores.append(nombre)
+        try:
+            dorsal = contenido.find('div', class_='shirtNumber ng-star-inserted').get_text()
+        except:
+            dorsal = 0
+        lista_valores.append(dorsal)
+        try:
+            imagen = contenido.find('div', class_='playerImage')    # Aquí se encuentra la imagen del jugador
+            url_imagen = imagen.find('img').get('src')
+        except:
+            url_imagen = ''
+        lista_valores.append(url_imagen)
+        etiquetas = contenido.find_all('span', class_='label')
+        valores = contenido.find_all('span', class_='value')
+        for i in range(len(etiquetas)): # Para guardar las columnas disponibles de cada jugador
+            lista_columnas.append(etiquetas[i].get_text())
+        for i in range(len(valores)):   # Para guardar los valores disponibles en la web de cada jugador
+            lista_valores.append(valores[i].get_text())
+        nueva_fila = dict(zip(lista_columnas, lista_valores))
+        df_jugadores = pd.concat([df_jugadores, pd.DataFrame([nueva_fila])], ignore_index=True) # Añadir la nueva fila al dataframe
+    df_jugadores = df_jugadores.rename(columns={'Club': 'equipo', 'Position': 'posicion', 'Geburtstag': 'fecha', 'Nationalität': 'pais', 
+                                            'Größe': 'altura', 'Gewicht': 'peso'})
+    return df_jugadores
