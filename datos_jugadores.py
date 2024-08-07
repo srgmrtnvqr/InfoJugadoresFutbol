@@ -267,3 +267,20 @@ def obtenerDatosJugadoresBundesliga():  # Función que devuelve un dataframe con
     df_jugadores = df_jugadores.rename(columns={'Club': 'equipo', 'Position': 'posicion', 'Geburtstag': 'fecha', 'Nationalität': 'pais', 
                                             'Größe': 'altura', 'Gewicht': 'peso'})
     return df_jugadores
+
+##### SERIE A #####
+def obtenerEnlacesEquiposSerieA():  # Función que devuelve una lista con los enlaces de los equipos de la Serie A
+    url_principal = 'https://www.legaseriea.it/it'
+    ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
+    driver = webdriver.Chrome(service=ruta, options=opciones)
+    driver.get(url_principal)  
+    time.sleep(3)
+    sopa = BeautifulSoup(driver.page_source, 'lxml')
+    tabla_equipos = sopa.find('div', class_='tab-content')
+    filas_equipos = tabla_equipos.find_all('a')
+    enlaces_equipos = []
+    for i in range(len(filas_equipos)):   
+        enlace = filas_equipos[i].get('href')
+        enlaces_equipos.append(enlace)
+    driver.close()
+    return enlaces_equipos
