@@ -21,7 +21,7 @@ Las ligas incluidas para descargar sus jugadores son:
 - Premier League (https://www.premierleague.com/clubs) :white_check_mark:
 - Bundesliga (https://www.bundesliga.com/de/bundesliga/clubs) :white_check_mark:
 - Serie A (https://www.legaseriea.it/it) :construction:
-- Ligue 1
+- Ligue 1 :construction:
 Los datos descargados son almacenados en un Excel para su posterior análisis.
 
 ## Guía de usuario
@@ -34,7 +34,9 @@ Pasos a seguir para descargar la información de los jugadores de las ligas disp
 - 2. Ejecuta las celdas correspondientes a la liga de la que quieres obtener los datos:
      [La Liga](#la-liga) ,
      [Premier League](#premier-league) ,
-     [Bundesliga](#bundesliga) 
+     [Bundesliga](#bundesliga) ,
+     [Serie A](#serie-a) y
+     [Ligue 1](#ligue-1)
 
      ### La Liga
      `` # Descargar jugadores de La Liga (2024-2025) ``
@@ -83,6 +85,12 @@ Pasos a seguir para descargar la información de los jugadores de las ligas disp
 
      ### Bundesliga
      `` # Descargar jugadores de la Bundesliga (2024-2025) ``
+
+
+     ### Serie A
+
+
+     ### Ligue 1
 
      
 
