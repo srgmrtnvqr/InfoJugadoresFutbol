@@ -284,3 +284,46 @@ def obtenerEnlacesEquiposSerieA():  # Función que devuelve una lista con los en
         enlaces_equipos.append(enlace)
     driver.close()
     return enlaces_equipos
+
+def obtenerDatosJugadoresSerieA():
+    url_jugadores = 'https://www.legaseriea.it/it/serie-a/calciatori'
+    ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
+    driver = webdriver.Chrome(service=ruta, options=opciones)
+    driver.get(url_jugadores)  
+    time.sleep(3)
+    # Navegar hacia abajo en la web
+    tamaño = driver.execute_script("return window.screen.height;")  # Tamaño de la parte visible de la página
+    i = 1
+    while True:
+        driver.execute_script(f"window.scrollTo(0, {tamaño * i});")
+        i += 1
+        time.sleep(2)   # Pausa entre cada bajada
+        tamaño_total = driver.execute_script("return document.body.scrollHeight;")  # Tamaño de la parte donde se encuentran todos los jugadores
+        if tamaño * i > tamaño_total:  # Para comprobar si se ha llegado al final de la página
+            break
+    sopa = BeautifulSoup(driver.page_source, "lxml")
+    contenido = sopa.find('tbody', class_='hm-tbody')   
+    elementos = contenido.find_all('tr')  # Buscar en la página los elementos donde están los enlaces
+    imagenes = []
+    nombres = []
+    equipos = []
+    posiciones = []
+    fechas = []
+    paises = []
+    for i in range(len(elementos)):
+        imagen = elementos[i].find('img', class_='player-img align-self-end').get('src')
+        imagenes.append(imagen)
+        nombre = elementos[i].find('h3').get_text()
+        nombres.append(nombre)
+        equipo = elementos[i].find('h3', class_='medium black text-capitalize').get_text()
+        equipos.append(equipo)
+        posicion = elementos[i].find('h3', class_='regular black text-capitalize d-lg-block d-none').get_text()
+        posiciones.append(posicion)
+        fecha = elementos[i].find('h3', class_='regular black').get_text()
+        fechas.append(fecha)
+        pais = elementos[i].find('h3', class_='regular black text-capitalize').get_text()
+        paises.append(pais)
+    driver.close()
+    columnas = ['jugador', 'equipo', 'posicion', 'pais', 'fecha', 'foto']
+    df_jugadores = pd.DataFrame([nombres, equipos, posiciones, paises, fechas, imagenes], index=columnas)
+    return df_jugadores.T
