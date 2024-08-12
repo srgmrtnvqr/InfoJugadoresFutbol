@@ -327,3 +327,5 @@ def obtenerDatosJugadoresSerieA():
     columnas = ['jugador', 'equipo', 'posicion', 'pais', 'fecha', 'foto']
     df_jugadores = pd.DataFrame([nombres, equipos, posiciones, paises, fechas, imagenes], index=columnas)
     return df_jugadores.T
+
+##### Ligue 1 #####
