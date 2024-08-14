@@ -329,3 +329,33 @@ def obtenerDatosJugadoresSerieA():
     return df_jugadores.T
 
 ##### Ligue 1 #####
+def obtenerEnlacesEquiposLigue1():  # Función que devuelve una lista con los enlaces de los equipos de la Ligue 1
+    url_liga = 'https://ligue1.com/competitions/ligue1mcdonalds?tab=standings'
+    ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
+    driver = webdriver.Chrome(service=ruta, options=opciones)
+    driver.get(url_liga)  
+    time.sleep(5)
+    elementos = driver.find_elements(By.XPATH, '//*[@id="__next"]/div/div/div[2]/div[2]/div/div/div[3]/div/div[3]/div/div[2]/div/div[1]/div/div/div/div/div[1]/div/a')
+    enlaces_equipos = []
+    for i in elementos:
+        enlace = i.get_attribute('href')
+        enlaces_equipos.append(enlace)
+    driver.close()
+    return enlaces_equipos
+
+def obtenerEnlacesJugadoresLigue1(): # Función que devuelve el enlace de cada jugador de la Ligue 1
+    equipos = obtenerEnlacesEquiposLigue1()
+    lista_jugadores = []
+    for i in range(len(equipos)):
+        url_equipo = equipos[i] + '?tab=squad'
+        ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
+        driver = webdriver.Chrome(service=ruta, options=opciones)
+        driver.get(url_equipo) 
+        time.sleep(8)
+        contenido = driver.find_element(By.XPATH, '//*[@id="__next"]/div/div/div[2]/div[2]/div/div/div/div[3]/div/div[3]/div/div')
+        elementos = contenido.find_elements(By.XPATH, '//*[@id="__next"]/div/div/div[2]/div[2]/div/div/div/div[3]/div/div[3]/div/div/div/div/a')
+        for i in elementos:
+            enlace = i.get_attribute('href')
+            lista_jugadores.append(enlace)
+        #driver.close()
+    return lista_jugadores
