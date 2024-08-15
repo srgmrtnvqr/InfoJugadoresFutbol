@@ -359,3 +359,68 @@ def obtenerEnlacesJugadoresLigue1(): # Función que devuelve el enlace de cada j
             lista_jugadores.append(enlace)
         #driver.close()
     return lista_jugadores
+
+def obtenerDatosJugadoresLigue1(enlaces_jugadores_l1):  # Devuelve un dataframe con los datos de los jugadores de la Ligue 1
+    nombres = []
+    dorsales = []
+    equipos = []
+    posiciones = []
+    paises = []
+    fechas = []
+    for i in range(len(enlaces_jugadores_l1)):  # Primer bucle For para cada equipo
+        url_jugador = enlaces_jugadores_l1[i]
+        ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
+        driver = webdriver.Chrome(service=ruta, options=opciones)
+        driver.get(url_jugador) 
+        time.sleep(5)
+        tamaño = driver.execute_script("return window.screen.height;")  # Tamaño de la parte visible de la página
+        i = 1
+        while True:
+            driver.execute_script(f"window.scrollTo(0, {tamaño * i});")
+            i += 1
+            time.sleep(1)   # Pausa entre cada bajada
+            tamaño_total = driver.execute_script("return document.body.scrollHeight;")  # Tamaño de la parte donde se encuentran todos los jugadores
+            if tamaño * i > tamaño_total:  # Para comprobar si se ha llegado al final de la página
+                break
+        sopa = BeautifulSoup(driver.page_source, "lxml")
+        try:
+            nombre = sopa.find('h6', class_='css-146c3p1 r-14z05s1 r-ubezar r-14yzgew').get_text()
+        except:
+            nombre = ''
+        try:
+            apellido = sopa.find('h2', class_='css-146c3p1 r-m5oelx r-xb2eav r-2agvir').get_text()
+        except:
+            apellido = ''
+        nombre_completo = nombre + ' ' + apellido
+        nombres.append(nombre_completo)
+        try:
+            dorsal = sopa.find('h1', class_='css-146c3p1 r-m5oelx r-s67bdx r-162c8fk').get_text()
+        except:
+            dorsal = ''
+        dorsales.append(dorsal)
+        try:
+            equipo = sopa.find('title').get_text()
+            equipo = equipo.split('- ')[1]
+        except:
+            equipo = ''
+        equipos.append(equipo)
+        try:
+            posicion = sopa.find('h6', class_='css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-14z05s1 r-ubezar r-14yzgew').get_text()
+        except:
+            posicion = ''
+        posiciones.append(posicion)
+        contenedor = sopa.find_all('div', class_='css-175oi2r r-1awozwy r-18u37iz r-1cmwbt1 r-1777fci')
+        fecha = ''
+        pais = ''
+        if len(contenedor) == 1:
+            pais = contenedor[0].find('h6', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7')
+        elif len(contenedor) == 2:
+            pais = contenedor[0].find('h6', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7')
+            fecha = contenedor[1].find('h6', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7')
+        else:
+            pass
+        paises.append(pais)
+        fechas.append(fecha)
+    columnas = ['jugador', 'equipo', 'dorsal', 'posicion', 'pais', 'fecha']
+    df_jugadores = pd.DataFrame([nombres, equipos, dorsales, posiciones, paises, fechas], index=columnas)
+    return df_jugadores.T
