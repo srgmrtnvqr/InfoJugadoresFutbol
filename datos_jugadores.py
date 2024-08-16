@@ -413,10 +413,10 @@ def obtenerDatosJugadoresLigue1(enlaces_jugadores_l1):  # Devuelve un dataframe 
         fecha = ''
         pais = ''
         if len(contenedor) == 1:
-            pais = contenedor[0].find('h6', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7')
+            pais = contenedor[0].find('div', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7').get_text()
         elif len(contenedor) == 2:
-            pais = contenedor[0].find('h6', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7')
-            fecha = contenedor[1].find('h6', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7')
+            pais = contenedor[0].find('div', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7').get_text()
+            fecha = contenedor[1].find('div', class_='css-146c3p1 r-c59phl r-ubezar r-135wba7').get_text()
         else:
             pass
         paises.append(pais)
