@@ -16,12 +16,13 @@
 ---
 Este repositorio contiene el código para descargar los datos de los jugadores inscritos en ligas de fútbol profesionales.
 
-Las ligas incluidas para descargar sus jugadores son: 
+Las ligas disponibles para descargar sus jugadores son: 
 - La Liga (https://www.laliga.com/es-GB/laliga-easports/clubes) :white_check_mark:
 - Premier League (https://www.premierleague.com/clubs) :white_check_mark:
 - Bundesliga (https://www.bundesliga.com/de/bundesliga/clubs) :white_check_mark:
-- Serie A (https://www.legaseriea.it/it) :construction:
-- Ligue 1 :construction:
+- Serie A (https://www.legaseriea.it/it/serie-a/calciatori) :white_check_mark:
+- Ligue 1 (https://ligue1.com/competitions/ligue1mcdonalds?tab=standings) :white_check_mark:
+
 Los datos descargados son almacenados en un Excel para su posterior análisis.
 
 ## Guía de usuario
@@ -51,7 +52,8 @@ Pasos a seguir para descargar la información de los jugadores de las ligas disp
      ```
      df_jugadores = datos_jugadores.obtenerDatosJugadores(lista_jugadores)
      ```
-     La siguiente celda de código sirve para tratar la fecha de cada jugador.
+     
+     La celda de abajo sirve para tratar la fecha de cada jugador.
      ```
      # Tratamiento de los datos
      df_jugadores['fecha'] = df_jugadores.fecha.str.slice(start=0, stop=10)
@@ -69,7 +71,7 @@ Pasos a seguir para descargar la información de los jugadores de las ligas disp
      ### Premier League
      `` # Descargar jugadores de la Premier League (2024-2025) ``
 
-     Para la Premier League, puedes obtener los enlaces de los jugadores directamente. Para ello, ejecuta la celda de código que está dentro de `` Obtención de los datos de todos los jugadores de la Premier League ``.
+     Para la Premier League, puedes obtener los datos de los jugadores directamente. Para ello, ejecuta la celda de código que está dentro de `` Obtención de los datos de todos los jugadores de la Premier League ``.
      ```
      df_jugadores_pl = datos_jugadores.obtenerDatosJugadoresPremier()
      df_jugadores_pl
@@ -86,12 +88,48 @@ Pasos a seguir para descargar la información de los jugadores de las ligas disp
      ### Bundesliga
      `` # Descargar jugadores de la Bundesliga (2024-2025) ``
 
+     Para la Bundesliga, puedes obtener los datos de los jugadores directamente. Para ello, ejecuta la celda de código que está dentro de `` Obtención de los datos de todos los jugadores de la Bundesliga  ``.
+     ```
+     df_jugadores_bdl = datos_jugadores.obtenerDatosJugadoresBundesliga()  
+     df_jugadores_bdl
+     ```
+     
+     A continuación, ejecuta la siguiente celda para que los datos de algunas columnas se puedan tratar mejor.
+     ```
+     # Tratamiento de los datos
+     df_jugadores_bdl['fecha'] = (df_jugadores_bdl.fecha.str.slice(start=0, stop=10)).str.replace('.','/')
+     df_jugadores_bdl['pais'] = [pais[0] for pais in df_jugadores_bdl.pais.str.split(',')]
+     df_jugadores_bdl['peso'] = [peso[0] for peso in df_jugadores_bdl.peso.str.split(' ')]
+     df_jugadores_bdl['altura'] = [altura[0] for altura in df_jugadores_bdl.altura.str.split(' ')]
+     df_jugadores_bdl
+     ```
+
+     Por último, ejecuta la última celda para almacenar los datos en un Excel.
+     ```
+     # Almacenamiento de los datos en un Excel
+     df_jugadores_bdl.to_excel('info_jugadores_bundesliga.xlsx', index=False)
+     ```
+
+
 
      ### Serie A
+     `` # Descargar jugadores de la Serie A (2024-2025) ``
+     
+     Para la Serie A, puedes obtener los datos de los jugadores directamente. Para ello, ejecuta la celda de código que está dentro de `` Obtención de los datos de todos los jugadores de la Serie A  ``.
+     ```
+     df_jugadores_SerieA = datos_jugadores.obtenerDatosJugadoresSerieA()
+     df_jugadores_SerieA
+     ```
+     
+     Por último, ejecuta la última celda para almacenar los datos en un Excel.
+     ```
+     df_jugadores_SerieA.to_excel('info_jugadores_seriea.xlsx', index=False)
+     ```
+
 
 
      ### Ligue 1
-
+     `` # Descargar jugadores de la Ligue 1 (2024-2025) ``
      
 
 ## Dependencias
