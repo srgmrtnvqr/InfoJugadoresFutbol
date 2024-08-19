@@ -189,7 +189,10 @@ def obtenerDatosJugadoresPremier(): # Función que devuelve un dataframe con los
                 pais = contenedor[i].find('span', class_='stats-card__player-country').get_text()
             else:
                 pais = ''
-            url_foto = imagenes[i].get_attribute('src')
+            try:
+                url_foto = imagenes[i].get_attribute('src')
+            except:
+                url_foto = ''
             nombres.append(nombre_apellido)
             equipos.append(equipo)
             dorsales.append(dorsal)
