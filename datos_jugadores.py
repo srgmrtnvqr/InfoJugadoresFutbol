@@ -9,6 +9,12 @@ from selenium.webdriver.common.by import By
 opciones = webdriver.ChromeOptions()
 opciones.add_experimental_option('excludeSwitches', ['enable-logging'])
 
+# Webdriver
+def obtenerWebDriver():
+    ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
+    driver = webdriver.Chrome(service=ruta, options=opciones)
+    return driver
+
 ##### LIGA ESPAÑOLA #####
 def obtenerEnlacesEquiposLaLiga():    # Función que devuelve el enlace de cada equipo de La Liga
     url_principal = 'https://www.laliga.com/laliga-easports/clubes'
@@ -27,10 +33,11 @@ def obtenerEnlacesJugadoresLaLiga():  # Función que devuelve el enlace de cada 
     enlaces_jugadores = []
     enlaces_equipos = obtenerEnlacesEquiposLaLiga()
     for i in range(len(enlaces_equipos)):
-        url_equipo = 'https://www.laliga.com' + enlaces_equipos[i] + '/plantilla'
-        peticion = requests.get(url_equipo)
-        time.sleep(2)
-        sopa = BeautifulSoup(peticion.text, 'lxml')
+        url_equipo = 'https://www.laliga.com' + enlaces_equipos[i]
+        driver = obtenerWebDriver()
+        driver.get(url_equipo)  
+        time.sleep(3)
+        sopa = BeautifulSoup(driver.page_source, 'lxml')
         contenido = sopa.find('div', class_='styled__SquadListContainer-sc-sx1q1t-0 hwjXzG')
         elementos = contenido.find_all('a', class_='link')
         for i in range(len(elementos)):
@@ -158,8 +165,7 @@ def obtenerDatosJugadoresPremier(): # Función que devuelve un dataframe con los
     urls_equipos = obtenerEnlacesEquiposPremier()   # Llamada a la función para obtener los enlaces de los equipos
     for i in range(len(urls_equipos)):  # Primer bucle For para cada equipo
         url_equipo = 'https://www.premierleague.com' + urls_equipos[i]
-        ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
-        driver = webdriver.Chrome(service=ruta, options=opciones)
+        driver = obtenerWebDriver()
         driver.get(url_equipo)  # Para poder acceder a la url de las imágenes
         imagenes = driver.find_elements(By.XPATH, '//*[@id="mainContent"]/div[3]/div/ul/div/ul/li/a/div/div/div[3]/img')
         peticion = requests.get(url_equipo) # Para acceder a los demás datos de los jugadores
@@ -270,8 +276,10 @@ def obtenerDatosJugadoresBundesliga():  # Función que devuelve un dataframe con
         except:
             url_imagen = ''
         lista_valores.append(url_imagen)
-        etiquetas = contenido.find_all('span', class_='label')
-        valores = contenido.find_all('span', class_='value')
+        try:
+            etiquetas = contenido.find_all('span', class_='label')
+            valores = contenido.find_all('span', class_='value')
+        except: pass
         for i in range(len(etiquetas)): # Para guardar las columnas disponibles de cada jugador
             lista_columnas.append(etiquetas[i].get_text())
         for i in range(len(valores)):   # Para guardar los valores disponibles en la web de cada jugador
@@ -285,8 +293,7 @@ def obtenerDatosJugadoresBundesliga():  # Función que devuelve un dataframe con
 ##### SERIE A #####
 def obtenerEnlacesEquiposSerieA():  # Función que devuelve una lista con los enlaces de los equipos de la Serie A
     url_principal = 'https://www.legaseriea.it/it'
-    ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
-    driver = webdriver.Chrome(service=ruta, options=opciones)
+    driver = obtenerWebDriver()
     driver.get(url_principal)  
     time.sleep(3)
     sopa = BeautifulSoup(driver.page_source, 'lxml')
@@ -301,8 +308,7 @@ def obtenerEnlacesEquiposSerieA():  # Función que devuelve una lista con los en
 
 def obtenerDatosJugadoresSerieA():
     url_jugadores = 'https://www.legaseriea.it/it/serie-a/calciatori'
-    ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
-    driver = webdriver.Chrome(service=ruta, options=opciones)
+    driver = obtenerWebDriver()
     driver.get(url_jugadores)  
     time.sleep(3)
     # Navegar hacia abajo en la web
@@ -345,8 +351,7 @@ def obtenerDatosJugadoresSerieA():
 ##### Ligue 1 #####
 def obtenerEnlacesEquiposLigue1():  # Función que devuelve una lista con los enlaces de los equipos de la Ligue 1
     url_liga = 'https://ligue1.com/competitions/ligue1mcdonalds?tab=standings'
-    ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
-    driver = webdriver.Chrome(service=ruta, options=opciones)
+    driver = obtenerWebDriver()
     driver.get(url_liga)  
     time.sleep(5)
     elementos = driver.find_elements(By.XPATH, '//*[@id="__next"]/div/div/div[2]/div[2]/div/div/div[3]/div/div[3]/div/div[2]/div/div[1]/div/div/div/div/div[1]/div/a')
@@ -362,8 +367,7 @@ def obtenerEnlacesJugadoresLigue1(): # Función que devuelve el enlace de cada j
     lista_jugadores = []
     for i in range(len(equipos)):
         url_equipo = equipos[i] + '?tab=squad'
-        ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
-        driver = webdriver.Chrome(service=ruta, options=opciones)
+        driver = obtenerWebDriver()
         driver.get(url_equipo) 
         time.sleep(8)
         contenido = driver.find_element(By.XPATH, '//*[@id="__next"]/div/div/div[2]/div[2]/div/div/div/div[3]/div/div[3]/div/div')
@@ -383,8 +387,7 @@ def obtenerDatosJugadoresLigue1(enlaces_jugadores_l1):  # Devuelve un dataframe 
     fechas = []
     for i in range(len(enlaces_jugadores_l1)):  # Primer bucle For para cada equipo
         url_jugador = enlaces_jugadores_l1[i]
-        ruta = Service(executable_path=r'/Users/sergi/Desktop/Proyectos/ChromeDriver/chromedriver.exe')
-        driver = webdriver.Chrome(service=ruta, options=opciones)
+        driver = obtenerWebDriver()
         driver.get(url_jugador) 
         time.sleep(5)
         tamaño = driver.execute_script("return window.screen.height;")  # Tamaño de la parte visible de la página
